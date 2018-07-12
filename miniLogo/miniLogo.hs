@@ -1,3 +1,9 @@
+-- Robert Hayden Anderson
+-- anderrob
+-- anderrob@oregonstate.edu
+-- cs381
+-- summer 2018
+
 module MiniLogo where
 
     import Data.List
@@ -24,7 +30,9 @@ module MiniLogo where
     --           |  define macro (var*) {prog}    define a macro
     --           |  call macro (expr*)            invoke a macro
     
-    -- | 1. Define the abstract syntax as a set of Haskell data types.
+    -- 1. Define the abstract syntax of MiniLogo as a set of Haskell data types. 
+    -- You should use built-in types for num, var, and macro. (If you want to define 
+    -- a type Num, you will have to hide that name from the Prelude).
     --
     type Num = Int
     type Var = String
@@ -45,15 +53,21 @@ module MiniLogo where
               | Call Macro [Expr]
               deriving (Eq,Show)
     
-    -- | 2. Define a MiniLogo macro "line."
+    -- 2. Define a MiniLogo macro line (x1,y1,x2,y2) that (starting from anywhere on 
+    -- the canvas) draws a line segment from (x1,y1) to (x2,y2).
+    -- Write the macro in MiniLogo concrete syntax (i.e. the notation defined by the 
+    -- grammar and used in the example programs above). Include this definition in a 
+    -- comment in your submission.
+    -- Encode the macro definition as a Haskell value using the data types defined 
+    -- in Task 1. This corresponds to the abstract syntax of MiniLogo. Your Haskell 
+    -- definition should start with something like line = Define "line" ...
     --
     --      Concrete syntax in a comment:
-    --
-    --
-    --
-    --
-    --      Abstract syntax in code (include correct type header):
-    --
+    --      line = Define line (x1,y1,x2,y2){
+    --              pen up; move (x1,y1);
+    --              pen down; move (x2,y2);
+    --              }
+
     line :: Cmd
     line = Define "line" ["x1","y1","x2","y2"]
                   [Pen Up,   Move (Var "x1")(Var "y1"),
@@ -61,15 +75,20 @@ module MiniLogo where
     
     
     
-    -- | 3. Define a MiniLogo macro "nix" using "line" defined above.
+    -- Use the line macro you just defined to define a new MiniLogo macro nix (x,y,w,h) 
+    -- that draws a big “X” of width w and height h, starting from position (x,y). 
+    -- Your definition should not contain any move commands.
+    -- Write the macro in MiniLogo concrete syntax and include this definition in a comment 
+    -- in your submission.
+    -- Encode the macro definition as a Haskell value, representing the abstract syntax of 
+    -- the definition.
     --
     --      Concrete syntax in a comment:
-    --
-    --
-    --
-    --
-    --      Abstract syntax in code (include correct type header):
-    --
+    --      nix = Define nix (x,y,w,h){
+    --              line(x,y,x+w,y+h);
+    --              line (x+w, y, x, y+h);
+    --            }
+
     nix :: Cmd
     nix = Define "nix" ["x","y","w","h"]
                 [Call "line" [Var "x", Var "y", Add (Var "x") (Var "w"), Add (Var "y") (Var "h")],
@@ -77,45 +96,53 @@ module MiniLogo where
 
     
     
-    -- | 4. Define a Haskell function "steps" (steps :: Int -> Prog) that draws
-    --      a staircase of n steps starting from (0,0).
-    --
+    -- Define a Haskell function steps :: Int -> Prog that constructs a MiniLogo program that 
+    -- draws a staircase of n steps starting from (0,0). Here is a visual illustration of 
+    -- what the generated program should draw for a couple different applications of steps.
+
     steps :: Int -> Prog
     steps 0 = []
     steps 1 = [Pen Up, Move (Num 0)(Num 0), Pen Down, Move (Num 0)(Num 1), Move (Num 1)(Num 1), Pen Up]
     steps n = steps (n - 1) ++ [Move (Num (n - 1))(Num n), Move (Num n)(Num n)]
     
     
-    -- | 5. Define a Haskell function "macros" (macros :: Prog -> [Macro] that
-    --      returns a list of the names of all the macros that are defined anywhere
-    --      in a given MiniLogo program.
-    --
+    -- Define a Haskell function macros :: Prog -> [Macro] that returns a list of the names of 
+    -- all of the macros that are defined anywhere in a given MiniLogo program. Don’t worry 
+    -- about duplicates—if a macro is defined more than once, the resulting list may include 
+    -- multiple copies of its name.
+
+
     macros :: Prog -> [Macro]
     macros [] = []
     macros ((Define macro _ _): xs) = macro: macros xs
     macros ((Pen _): xs)            = macros xs
     macros ((Call _ _): xs)         = macros xs
     macros ((Move _ _): xs)         = macros xs 
-    macros ((line _ _ _ _):xs)      = macros xs   
+   
     
-    -- | 6. Define a Haskell function "pretty" (pretty :: Prog -> String) that
-    --      "pretty-prints" a MiniLogo program.
-    --
+    -- Define a Haskell function pretty :: Prog -> String that pretty-prints a MiniLogo program. 
+    -- That is, it transforms the abstract syntax (a Haskell value) into nicely formatted 
+    -- concrete syntax (a string of characters). Your pretty-printed program should look similar 
+    -- to the example programs given above; however, for simplicity you will probably want to 
+    -- print just one command per line.
+    -- In GHCi, you can render a string with newlines by applying the function putStrLn. 
+    -- So, to pretty-print a program p use: putStrLn (pretty p).
+    
     pretty :: Prog -> String
     pretty [] = ""
-    pretty ((Pen p):cmds) = "\nPen " ++ (case p of
+    pretty ((Pen p):xs) = "\nPen " ++ (case p of
           Up -> "Up "
-          Down -> "Down ") ++ pretty cmds ++ ""
-    pretty ((Move x y):cmds) = "\nMove " ++  (prettyExpr x) ++ " " ++ (prettyExpr y) ++ " " ++ pretty cmds
-    pretty ((Call x y):cmds) = "\nCall " ++ x ++ " " ++ concat (map prettyExpr y) ++ pretty cmds
-    pretty ((Define x y z):cmds) = "\nDefine " ++ x ++ " " ++ concat(intersperse " " y) ++ " " ++ pretty z ++ pretty cmds
+          Down -> "Down ") ++ pretty xs ++ ""
+    pretty ((Move x y):xs) = "\nMove " ++  (prettyExpr x) ++ " " ++ (prettyExpr y) ++ " " ++ pretty xs
+    pretty ((Call x y):xs) = "\nCall " ++ x ++ " " ++ concat (map prettyExpr y) ++ pretty xs
+    pretty ((Define x y z):xs) = "\nDefine " ++ x ++ " " ++ concat(intersperse " " y) ++ " " ++ pretty z ++ pretty xs
     
     -- This is a helper function that just turns expressions into strings
     --https://stackoverflow.com/questions/2784271/haskell-converting-int-to-string
     prettyExpr :: Expr -> String
     prettyExpr (Var x) = x
     prettyExpr (Num x) = (show x)
-    prettyExpr (Add x y) = "Add " ++ prettyExpr x ++ prettyExpr y ++ "\n"
+    prettyExpr (Add x y) = "Add " ++ prettyExpr x ++ prettyExpr y
     
     
     --
@@ -125,10 +152,19 @@ module MiniLogo where
     --      evaluates expressions by replacing additions of literals with the
     --      result.
     --
-    optE = undefined
+    optE :: Expr -> Expr
+    optE (Var x) = Var x
+    optE (Num x) = Num x
+    optE (Add x y) = Add (optE x) (optE y)
     
     
     -- | 8. Define a Haskell function "optP" (optP :: Prog -> Prog) that optimizes
     --      all of the expressions contained in a given program using optE.
     --
-    optP = undefined
+    optP :: Prog -> Prog
+    optP (x:xs) = optProg x : optP xs
+
+    optProg :: Cmd -> Cmd
+    optProg (Call x y) = Call x (map optE y)
+    optProg (Move x y) = Move (optE x) (optE y)
+    optProg (Pen x) = (Pen x)
