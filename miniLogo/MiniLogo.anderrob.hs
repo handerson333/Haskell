@@ -163,14 +163,11 @@ module MiniLogo where
     -- replacing any additions of literals with the result. For example, given the expression 
     -- (2+3)+x, optE should return the expression 5+x.
 
-    -- optE :: Expr -> Expr
-    -- optE (Var x) = Var x
-    -- optE (Num x) = Num x
-    -- optE (Add x y) = Add (optE x) (optE y)
-    
     optE :: Expr -> Expr
-    optE (Add (Num l)(Num r)) = Num $ l + r
-    optE (Var x) = optE Var x
+    optE (Var x) = Var x
+    optE (Num x) = Num x
+    optE (Add x y) = Add (optE x) (optE y)
+    
     
     -- 8. Define a Haskell function optP :: Prog -> Prog that optimizes all of the expressions 
     -- contained in a given program using optE.
