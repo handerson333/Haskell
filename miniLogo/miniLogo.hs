@@ -127,40 +127,50 @@ module MiniLogo where
     -- print just one command per line.
     -- In GHCi, you can render a string with newlines by applying the function putStrLn. 
     -- So, to pretty-print a program p use: putStrLn (pretty p).
-    
+
     pretty :: Prog -> String
-    pretty [] = ""
-    pretty ((Pen p):xs) = "\nPen " ++ (case p of
-          Up -> "Up "
-          Down -> "Down ") ++ pretty xs ++ ""
-    pretty ((Move x y):xs) = "\nMove " ++  (prettyExpr x) ++ " " ++ (prettyExpr y) ++ " " ++ pretty xs
-    pretty ((Call x y):xs) = "\nCall " ++ x ++ " " ++ concat (map prettyExpr y) ++ pretty xs
-    pretty ((Define x y z):xs) = "\nDefine " ++ x ++ " " ++ concat(intersperse " " y) ++ " " ++ pretty z ++ pretty xs
-    
-    -- This is a helper function that just turns expressions into strings
-    --https://stackoverflow.com/questions/2784271/haskell-converting-int-to-string
+    pretty []= ""
+    pretty ((Pen pen): xs ) = "Pen " ++ (case pen of
+                                    Up -> "Up; "
+                                    Down -> "Down; ") ++ pretty xs
+    pretty ((Move l r) : xs) = "Move(" ++ prettyExpr l ++ "," ++ prettyExpr r ++ "); " ++ pretty xs
+    pretty ((Define name args prog) : xs) = "define " ++ show name ++ " (" ++ prettyArgs args ", " 
+                                    ++ ") {" ++ pretty prog ++ "}" ++ pretty xs
+    pretty ((Call name args) : xs) = "Call (" ++ prettyArgs (map prettyExpr args) ", " 
+                                    ++ "); " ++ pretty xs
+
+
+    -- This is just a helper function that turns expressions into strings
+    -- source: https://stackoverflow.com/questions/2784271/haskell-converting-int-to-string
     prettyExpr :: Expr -> String
-    prettyExpr (Var x) = x
-    prettyExpr (Num x) = (show x)
-    prettyExpr (Add x y) = "Add " ++ prettyExpr x ++ prettyExpr y
+    prettyExpr (Var x) = x 
+    prettyExpr (Num x) = show x
+    prettyExpr (Add l r) = prettyExpr l ++ " + " ++ prettyExpr r 
+
+
+    -- This is a helper function that will print lists
+    prettyArgs :: [String] -> String ->[Char]
+    prettyArgs [] _ = ""
+    prettyArgs (x:xs) s = x ++ s ++ prettyArgs xs s
+    
+
     
     
-    --
-    -- * Bonus Problems
-    --
-    -- | 7. Define a Haskell function "optE" (optE :: Expr -> Expr) that partially
-    --      evaluates expressions by replacing additions of literals with the
-    --      result.
-    --
+    
+    -- Bonus Problems
+
+    -- 7. Define a Haskell function optE :: Expr -> Expr that partially evaluates expressions by 
+    -- replacing any additions of literals with the result. For example, given the expression 
+    -- (2+3)+x, optE should return the expression 5+x.
+
     optE :: Expr -> Expr
     optE (Var x) = Var x
     optE (Num x) = Num x
     optE (Add x y) = Add (optE x) (optE y)
     
     
-    -- | 8. Define a Haskell function "optP" (optP :: Prog -> Prog) that optimizes
-    --      all of the expressions contained in a given program using optE.
-    --
+    -- 8. Define a Haskell function optP :: Prog -> Prog that optimizes all of the expressions 
+    -- contained in a given program using optE.
     optP :: Prog -> Prog
     optP (x:xs) = optProg x : optP xs
 
