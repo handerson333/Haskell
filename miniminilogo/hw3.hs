@@ -51,7 +51,8 @@ module HW3 where
     --
     cmd :: Cmd -> State -> (State, Maybe Line)
     cmd (Pen x) (_,y) = ((x,y), (Nothing)) 
-    cmd (Move x y) (Down, z) = ((Down x y), Just ((z), (x,y)))
+    cmd (Move x y) (Down, z) = ((Down, (x, y)), Just ((z), (x,y)))
+    cmd (Move x y) (Up, z) = ((Up, (x, y)), Nothing)
     
     
     -- | Semantic function for Prog.
@@ -62,8 +63,18 @@ module HW3 where
     --   >>> prog (steps 2 0 0) start
     --   ((Down,(2,2)),[((0,0),(0,1)),((0,1),(1,1)),((1,1),(1,2)),((1,2),(2,2))])
     prog :: Prog -> State -> (State, [Line])
-    prog = undefined
+    prog program st = helpProg program (st, []) 
     
+
+
+    helpProg :: Prog -> (State, [Line]) -> (State, [Line])
+    helpProg [] st = st
+    helpProg (x:xs) (st , ls) =   
+                    let (sta, lin) = cmd x st in
+                    case lin of
+                        Just lin -> helpProg xs (sta, ls ++ [lin])
+                        Nothing -> helpProg xs (sta, ls)
+                                  
     
     --
     -- * Extra credit
@@ -72,4 +83,12 @@ module HW3 where
     -- | This should be a MiniMiniLogo program that draws an amazing picture.
     --   Add as many helper functions as you want.
     amazing :: Prog
-    amazing = undefined
+    amazing = [Pen Up, Move 5 5,Pen Down, Move 20 5, Move 20 10, Move 5 10, Move 5 5, Pen Up] ++ (steps 5 20 10)
+        ++ [Pen Up, Move 5 10, Pen Down, Move 3 13, Pen Up] ++ (bigbox 0 13) 
+        ++ [Pen Up, Move 0 17, Pen Down, Move 1 19,Move 2 17, Move 3 19, Move 4 17, Pen Up]
+        ++ [Pen Up, Move 7 5, Pen Down, Move 7 0, Pen Up]
+        ++ [Pen Up, Move 17 5, Pen Down, Move 17 0, Pen Up]
+
+    bigbox :: Int -> Int -> Prog
+    bigbox x y = [Pen Up, Move x y, Pen Down,
+        Move (x+4) y, Move (x+4) (y+4), Move x (y+4), Move x y]
