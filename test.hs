@@ -331,3 +331,5 @@ countTrues :: [Bool] -> Int
 countTrues = foldr 
        (\b i -> if b==True then i+1 else i) 0
 
+
+       
