@@ -91,16 +91,15 @@ module HW3 where
 
 
     amazing :: Prog
-    amazing = (bigbox 20 0) ++ (doBotLeft) ++ (doTopLeft)  ++ (doTopRight) ++ (doBotRight) ++ doM ++ doE ++ doH
-    -- amazing = (bigbox 20 0) ++ (doTheThing 40 0 20 5)
+    amazing = (bigbox 20 0) ++ (doBotLeft) ++ (doTopLeft)  ++ (doTopRight) ++ (doBotRight) ++ doMeh
     
     bigbox :: Int -> Int -> Prog
     bigbox x y = [Pen Up, Move x y, Pen Down,
         Move (x+40) y, Move (x+40) (y+40), Move x (y+40), Move x y]
     
 
-    -- doMeh :: Prog
-    -- doMeh = doM ++ doE ++ doH
+    doMeh :: Prog
+    doMeh = doM ++ doE ++ doH
     
     doM :: Prog
     doM     =   (doLine (29,15)(29,25))
