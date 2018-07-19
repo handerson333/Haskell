@@ -35,8 +35,12 @@ sem (Lit i) = \regs -> (regs, i)
 sem (Neg e) = \regs -> let result = sem e regs in (fst result, -(snd result))
 sem (Set A e) = \regs -> let x = sem e regs in ((snd x , snd regs), snd x)
 sem (Set B e) = \regs -> let x = sem e regs in ((fst regs, snd x), snd x)
--- sem (Set e) = \regs -> case sem e regs of 
+sem (Get r)   = \regs -> case r of 
+                          A -> (regs , fst regs)
+                          B -> (regs , snd regs)
                             
 
 -- sem (Get i) = \regs
 
+test :: Exp
+test = Get A
