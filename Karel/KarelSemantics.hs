@@ -9,7 +9,11 @@ import KarelState
 
 -- | Valuation function for Test.
 test :: Test -> World -> Robot -> Bool
-test = undefined
+test (Not t)      w r = undefined
+test (Faceing c)  w r = undefined
+test (Clear d)    w r = undefined
+test (Beeper)     w r = undefined
+test (Empty)      w r = undefined
 
 -- | Valuation function for Stmt.
 stmt :: Stmt -> Defs -> World -> Robot -> Result
