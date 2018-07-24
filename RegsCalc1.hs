@@ -43,4 +43,4 @@ sem (Get r)   = \regs -> case r of
 -- sem (Get i) = \regs
 
 test :: Exp
-test = Get A
+test = Get B
