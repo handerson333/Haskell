@@ -1,3 +1,8 @@
+-- Robert Hayden Anderson
+-- anderrob
+-- anderrob@oregonstate.edu
+-- cs381
+-- summer 2018
 module KarelSemantics where
 
 import Prelude hiding (Either(..))
@@ -9,10 +14,10 @@ import KarelState
 
 -- | Valuation function for Test.
 test :: Test -> World -> Robot -> Bool
-test (Not t)      w r = not (test t w r)                                -- Not test
-test (Facing c)   _ r = c == (getFacing r)                              -- Facing Cardinal Direction
-test (Clear d)    w r = (isClear (relativePos d r) w)   -- Clear Dir                
-test (Beeper)     w r = (hasBeeper (getPos r) w)                   -- Current location has a beeper?
+test (Not t)      w r = not (test t w r)              -- Not test
+test (Facing c)   _ r = c == (getFacing r)            -- Facing Cardinal Direction
+test (Clear d)    w r = (isClear (relativePos d r) w) -- Clear Dir                
+test (Beeper)     w r = (hasBeeper (getPos r) w)      -- Current location has a beeper?
 test (Empty)      w r = (isEmpty r)
 
 
